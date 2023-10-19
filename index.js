@@ -27,9 +27,7 @@ async function run() {
           const userProductCollection = client
                .db("rjTechDB")
                .collection("products");
-          const addCardCollection = client
-               .db("rjTechDB")
-               .collection("addCart");
+          const addCardCollection = client.db("rjTechDB").collection("addCart");
 
           app.get("/products", async (req, res) => {
                const cursor = userProductCollection.find();
@@ -51,26 +49,49 @@ async function run() {
                const result = await userProductCollection.insertOne(newProduct);
                res.send(result);
           });
-          
+          app.put("/products/:id", async (req, res) => {
+               const id = req.params.id;
+               const updateProduct = req.body;
+               const filter = { _id: new ObjectId(id) };
+               const options = { upsert: true };
+               const myProduct = {
+                    image: updateProduct.image,
+                    productName: updateProduct.productName,
+                    brandName: updateProduct.brandName,
+                    productType: updateProduct.productType,
+                    productPrice: updateProduct.productPrice,
+                    ShortDescription: updateProduct.ShortDescription,
+                    rating: updateProduct.rating,
+               };
+               console.log(myProduct);
+               const result = await userProductCollection.updateOne(
+                    filter,
+                    { $set: { ...myProduct } },
+                    options
+               );
+               res.send(result);
+          });
+
           //Add Cart Product
           app.get("/addCart", async (req, res) => {
                const cursor = addCardCollection.find();
                const result = await cursor.toArray();
                console.log(result);
                res.send(result);
-          }); 
+          });
           app.post("/addCart", async (req, res) => {
                const product = req.body;
                console.log(product);
                const result = await addCardCollection.insertOne(product);
                res.send(result);
           });
-          app.delete("/addCart/:id",async(req,res)=>{
+
+          app.delete("/addCart/:id", async (req, res) => {
                const id = req.params.id;
-               const query = {_id: new ObjectId(id)};
+               const query = { _id: new ObjectId(id) };
                const result = await addCardCollection.deleteOne(query);
                res.send(result);
-          })
+          });
           // Send a ping to confirm a successful connection
           await client.db("admin").command({ ping: 1 });
           console.log(
