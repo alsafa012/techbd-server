@@ -252,6 +252,12 @@ async function run() {
         res.status(500).json({ message: "Insert failed" });
       }
     });
+    app.delete("/hiddenProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await hiddenProductCollections.deleteOne(query);
+      res.send(result);
+    });
 
     app.get("/hiddenCategories", async (req, res) => {
       const result = await hiddenCategoryCollections.find().toArray();
